@@ -1,0 +1,75 @@
+div{
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 28px;
+    font-weight:bold;
+    border: 3px solid black;
+}
+table{
+    border: 2px solid black;
+    border-collapse: collapse;
+}
+td, th{
+    border: 2px solid red;
+    
+}
+
+#foo{
+    color:blue;
+}
+h1:hover{
+    color:red;
+}
+button{
+    height:50px;
+    width:200px;
+    background-color: green;
+    color :white;
+    font-weight: bold;
+}
+button:hover{
+    background-color: blue; 
+}
+
+@media (min-width: 600px){
+    body{
+        background-color: orange;
+    }
+}
+@media (max-width: 599px){
+    body{
+        background-color:blue;
+    }
+}
+#container {
+    display: flex;
+    flex-wrap: wrap
+}
+
+#container > div{
+    background-color: springgreen;
+    font-size: 20px;
+    width: 200px;
+    margin: 20px;
+    padding: 20px;
+}
+
+#grid{
+    background-color: green;
+    padding: 20px;
+    display:grid;
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+    grid-template-columns: 200px 200px 200px 200px auto;
+}
+
+.grid-item{
+    background-color: white;
+    font-size: 20px;
+    padding:20px;
+    
+}
+
+/* tailwind css */
+/* react */
+/* nodejs */
+/* learn with sumit react js */
