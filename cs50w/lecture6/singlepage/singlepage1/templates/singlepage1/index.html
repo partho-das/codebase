@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Single Page</title>
+        <style>
+        </style>
+        <script>
+           
+
+            window.onpopstate = (event) => {
+                console.log(event.state.section);
+                showSection(event.state.section);
+            }
+            // Shows given section
+            function showSection(section) {
+                
+                // Find section text from server
+                fetch(`sections/${section}`)
+                .then(response => response.text())
+                .then(text => {
+                    console.log(text);
+                    document.querySelector('#content').innerHTML = text;
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add button functionality
+                document.querySelectorAll('button').forEach(button => {
+                    button.onclick = function() {
+                        const section = this.dataset.section;
+                        history.pushState({section: section}, "", `section${section}`)
+                        showSection(section);
+                    };
+                });
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log("Loaded ");
+                let par = document.querySelector('#paragraph');
+                for(let i = 0; i <= 100; i++){
+                    let ptag = document.createElement('p');
+                    ptag.innerHTML = `Passage ${i}`
+                    par.appendChild(ptag);
+                    console.log(ptag);
+                }
+            });
+
+            document.onscroll = ()=> {
+                if(window.scrollY + window.innerHeight >= document.body.offsetHeight){
+                    document.querySelector('body').style.backgroundColor = "red";
+                }
+                else{
+                    document.querySelector('body').style.backgroundColor = "white";
+                }
+            };
+
+        </script>
+    </head>
+    <body>
+        <h1>Hello!</h1>
+        <button data-section="1">Section 1</button>
+        <button data-section="2">Section 2</button>
+        <button data-section="3">Section 3</button>
+        <div id="content">
+        </div>
+        <div id="paragraph">
+        </div>
+    </body>
+</html>

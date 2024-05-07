@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <title>Aminaiton Page</title>
+        <style>
+            @keyframes grow {
+                0%{
+                    font-size:20px;
+                    left: 0%;
+                }
+                50%{
+                    left: 50%;
+                    font-size: 100px;
+                }
+                100%{
+                    left: 0%;
+                    font-size: 20px;
+                }
+            }
+
+            #heading{
+                position: relative;
+                animation-name: grow;
+                animation-duration: 2s;
+                animation-fill-mode: forwards;
+                animation-iteration-count: infinite;
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', ()=> {
+                const h1 = document.querySelector('#heading');
+                h1.style.animationPlayState = 'paused';
+                document.querySelector('button').onclick = ()=> {
+                    if(h1.style.animationPlayState === 'paused'){
+                        h1.style.animationPlayState = 'running';
+                    }
+                    else{
+                        h1.style.animationPlayState = 'paused';
+                    }
+                };
+            });
+        </script>
+    </head>
+    <body>
+        <div id='container'>
+            <button>Click Me!</button>
+            <h1 id='heading'>Welcome</h1>
+        </div>
+    </body>
+
+</html>

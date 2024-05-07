@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <title>Addition Game</title>
+
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <style>
+        #app {
+            text-align: center;
+            font-family: sans-serif;
+        }
+
+        #problem {
+            font-size: 72px;
+        }
+        .wrong{
+            color:red;
+        }
+        .winner{
+            color: green;
+            font-size: 72px;
+        }
+    </style>
+</head>
+    <body>
+        <div id='app'></div>
+    </body>
+
+    <script type="text/babel">
+        function App() {
+            const [state, setState] = React.useState({
+                num1: Math.ceil( Math.random() * 10 ),
+                num2: Math.ceil( Math.random() * 10 ),
+                response: "",
+                is_false: false,
+                score: 0,
+            });
+
+            function updateResponse(event) {
+                if(event.key === 'Enter'){
+
+                    const answer = parseInt(event.target.value);
+                    const iscorrect = (answer === state.num1 + state.num2);
+                    setState({
+                        ...state,
+                        score: state.score + (iscorrect ? +1 : -1),
+                        num1: Math.ceil(Math.random() * 10),
+                        num2: Math.ceil(Math.random() * 10),
+                        is_false: !iscorrect,
+
+                    });
+                    
+                    event.target.value = "";
+                }
+            }
+
+            if(state.score == 10){
+                return (
+                    <div className="winner">Congratulation, You Won!</div>
+                );
+            }
+            return (
+                <div>
+                    <div id="problem" className = {state.is_false ? "wrong" : ""}>{state.num1} + {state.num2} </div>
+                    <input onKeyPress = {updateResponse} />
+                    <div> Score: {state.score}</div>
+                </div>
+            );
+        }
+        ReactDOM.render(<App />, document.querySelector("#app"));
+    </script>
+</html>
