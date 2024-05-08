@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Flight, Passenger
 # Create your views here.
@@ -11,14 +12,17 @@ def index(request):
     })
   
 def flight(request, flight_id):
-     flight = Flight.objects.get(pk = flight_id)
-     passengers = flight.passengers.all()
-     non_passengers = Passenger.objects.exclude(flight = flight).all()
-     return render(request, "flights/flight.html",{
-        "flight" : flight,
-        "passengers": passengers,
-        "non_passengers": non_passengers
-     })
+    try:
+        flight = Flight.objects.get(pk = flight_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("404 Page Not Found!", status=404)
+    passengers = flight.passengers.all()
+    non_passengers = Passenger.objects.exclude(flight = flight).all()
+    return render(request, "flights/flight.html",{
+    "flight" : flight,
+    "passengers": passengers,
+    "non_passengers": non_passengers
+    })
 
 def book(request, flight_id):
      if request.method ==  "POST":
