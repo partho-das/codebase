@@ -1,0 +1,11 @@
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\bin\Debug\net8.0\LinqQuiz.Library.deps.json
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\bin\Debug\net8.0\LinqQuiz.Library.dll
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\bin\Debug\net8.0\LinqQuiz.Library.pdb
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\LinqQuiz.Library.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\LinqQuiz.Library.AssemblyInfoInputs.cache
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\LinqQuiz.Library.AssemblyInfo.cs
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\LinqQuiz.Library.csproj.CoreCompileInputs.cache
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\LinqQuiz.Library.dll
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\refint\LinqQuiz.Library.dll
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\LinqQuiz.Library.pdb
+C:\Users\parth\OneDrive\Desktop\Code\Dotnet\htl-leo-csharp-4-master\exercises\9030-linq-quiz\LinqQuiz.Library\obj\Debug\net8.0\ref\LinqQuiz.Library.dll
