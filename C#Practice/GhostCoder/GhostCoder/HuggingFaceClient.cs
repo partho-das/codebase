@@ -27,7 +27,7 @@ public class HuggingFaceChatClient
             {
                 new { role = "user", content = userMessage }
             },
-            max_tokens = 50,
+            max_tokens = 200,
             temperature = 0.2
         };
 
