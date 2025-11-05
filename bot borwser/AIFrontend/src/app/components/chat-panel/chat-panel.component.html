@@ -1,0 +1,19 @@
+<div class="flex flex-col w-[300px] bg-gray-50 p-4 rounded-lg shadow">
+  <div class="flex-1 overflow-y-auto mb-3">
+    <div *ngFor="let msg of messages" class="mb-2">
+      <div [class.text-right]="msg.sender === 'user'">
+        <span
+          [class.bg-blue-200]="msg.sender==='user'"
+          [class.bg-gray-200]="msg.sender==='ai'"
+          class="inline-block px-2 py-1 rounded">
+          {{ msg.text }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex gap-2">
+    <input [(ngModel)]="input" class="flex-1 border rounded p-2" placeholder="Ask AI..." />
+    <button (click)="send()" class="bg-blue-600 text-white px-3 py-1 rounded">Send</button>
+  </div>
+</div>

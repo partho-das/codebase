@@ -5,6 +5,7 @@
 /C#Practice/GhostCoder/GhostCoder/obj
 /C#Practice/GhostCoder/GhostCoder/bin/Debug
 /C#Practice/GhostCoder/GhostCoder/.vs
+<<<<<<< HEAD
 /C#Practice/AIBackend/AIBackend/AIBackend/bin/Debug/net8.0
 /C#Practice/AIBackend/AIBackend/AIBackend/obj
 /C#Practice/AIBackend/AIBackend/.vs/AIBackend
@@ -48,3 +49,79 @@ C#Practice/Saga-State-Machine/Saga-Satate-Machine/Saga-Satate-Machine/obj/Debug/
 C#Practice/Saga-State-Machine/Saga-Satate-Machine/Saga-Satate-Machine/obj/Debug/net8.0/Saga-State-Machine.GlobalUsings.g.cs
 C#Practice/Saga-State-Machine/Saga-Satate-Machine/Saga-Satate-Machine/obj/Debug/net8.0/staticwebassets.removed.txt
 C#Practice/GhostCoder/.vs/GhostCoder/v17/DocumentLayout.json
+=======
+C#Practice/GhostCoder/.vs/GhostCoder/ColorByRegexConfig.txt
+C#Practice/GhostCoder/.vs/GhostCoder/CopilotIndices/17.14.1204.46620/CodeChunks.db
+C#Practice/GhostCoder/.vs/GhostCoder/CopilotIndices/17.14.1204.46620/SemanticSymbols.db
+C#Practice/GhostCoder/.vs/GhostCoder/FileContentIndex/15bd2a14-4509-4bd3-949d-cef8deab7407.vsidx
+C#Practice/GhostCoder/.vs/GhostCoder/FileContentIndex/7b3abb09-c6c2-4cea-b768-d178bda7dc46.vsidx
+C#Practice/GhostCoder/.vs/GhostCoder/FileContentIndex/b3f939c6-9140-4ef8-9f9a-bf7540241f32.vsidx
+C#Practice/GhostCoder/.vs/GhostCoder/FileContentIndex/ef7ad78b-d319-44a8-9e88-9138fad76249.vsidx
+C#Practice/GhostCoder/.vs/GhostCoder/v17/.suo
+C#Practice/GhostCoder/.vs/GhostCoder/v17/DocumentLayout.backup.json
+C#Practice/GhostCoder/.vs/GhostCoder/v17/DocumentLayout.json
+bot borwser/AIBackend/.vs/AIBackend/ColorByRegexConfig.txt
+bot borwser/AIBackend/.vs/AIBackend/config/applicationhost.config
+bot borwser/AIBackend/.vs/AIBackend/CopilotIndices/17.14.1204.46620/CodeChunks.db
+bot borwser/AIBackend/.vs/AIBackend/CopilotIndices/17.14.1204.46620/CodeChunks.db-shm
+bot borwser/AIBackend/.vs/AIBackend/CopilotIndices/17.14.1204.46620/CodeChunks.db-wal
+bot borwser/AIBackend/.vs/AIBackend/CopilotIndices/17.14.1204.46620/SemanticSymbols.db
+bot borwser/AIBackend/.vs/AIBackend/CopilotIndices/17.14.1204.46620/SemanticSymbols.db-shm
+bot borwser/AIBackend/.vs/AIBackend/CopilotIndices/17.14.1204.46620/SemanticSymbols.db-wal
+bot borwser/AIBackend/.vs/AIBackend/DesignTimeBuild/.dtbcache.v2
+bot borwser/AIBackend/.vs/AIBackend/FileContentIndex/72136647-f271-492e-9491-2d10d666d355.vsidx
+bot borwser/AIBackend/.vs/AIBackend/FileContentIndex/a14c15be-e892-4fea-bceb-fc0898eab591.vsidx
+bot borwser/AIBackend/.vs/AIBackend/v17/.futdcache.v2
+bot borwser/AIBackend/.vs/AIBackend/v17/.suo
+bot borwser/AIBackend/AIClient/HuggingFaceChatClient.cs
+bot borwser/AIBackend/AIClient/IAiService.cs
+bot borwser/AIBackend/bin/Debug/net8.0/AIBackend.deps.json
+bot borwser/AIBackend/bin/Debug/net8.0/AIBackend.dll
+bot borwser/AIBackend/bin/Debug/net8.0/AIBackend.exe
+bot borwser/AIBackend/bin/Debug/net8.0/AIBackend.pdb
+bot borwser/AIBackend/bin/Debug/net8.0/AIBackend.runtimeconfig.json
+bot borwser/AIBackend/bin/Debug/net8.0/AIBackend.staticwebassets.endpoints.json
+bot borwser/AIBackend/bin/Debug/net8.0/appsettings.Development.json
+bot borwser/AIBackend/bin/Debug/net8.0/Microsoft.AspNetCore.JsonPatch.dll
+bot borwser/AIBackend/bin/Debug/net8.0/Microsoft.DotNet.InternalAbstractions.dll
+bot borwser/AIBackend/bin/Debug/net8.0/Microsoft.Extensions.DependencyModel.dll
+bot borwser/AIBackend/bin/Debug/net8.0/Microsoft.Extensions.PlatformAbstractions.dll
+bot borwser/AIBackend/bin/Debug/net8.0/Newtonsoft.Json.dll
+bot borwser/AIBackend/bin/Debug/net8.0/Swashbuckle.Swagger.dll
+bot borwser/AIBackend/obj/AIBackend.csproj.nuget.dgspec.json
+bot borwser/AIBackend/obj/AIBackend.csproj.nuget.g.props
+bot borwser/AIBackend/obj/AIBackend.csproj.nuget.g.targets
+bot borwser/AIBackend/obj/project.assets.json
+bot borwser/AIBackend/obj/project.nuget.cache
+bot borwser/AIBackend/obj/Debug/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.AssemblyInfo.cs
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.AssemblyInfoInputs.cache
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.assets.cache
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.csproj.AssemblyReference.cache
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.csproj.BuildWithSkipAnalyzers
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.csproj.CoreCompileInputs.cache
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.csproj.FileListAbsolute.txt
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.csproj.Up2Date
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.dll
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.GeneratedMSBuildEditorConfig.editorconfig
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.genruntimeconfig.cache
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.GlobalUsings.g.cs
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.MvcApplicationPartsAssemblyInfo.cache
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.MvcApplicationPartsAssemblyInfo.cs
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.pdb
+bot borwser/AIBackend/obj/Debug/net8.0/AIBackend.sourcelink.json
+bot borwser/AIBackend/obj/Debug/net8.0/ApiEndpoints.json
+bot borwser/AIBackend/obj/Debug/net8.0/apphost.exe
+bot borwser/AIBackend/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json
+bot borwser/AIBackend/obj/Debug/net8.0/rjsmrazor.dswa.cache.json
+bot borwser/AIBackend/obj/Debug/net8.0/rpswa.dswa.cache.json
+bot borwser/AIBackend/obj/Debug/net8.0/staticwebassets.build.endpoints.json
+bot borwser/AIBackend/obj/Debug/net8.0/staticwebassets.build.json
+bot borwser/AIBackend/obj/Debug/net8.0/staticwebassets.build.json.cache
+bot borwser/AIBackend/obj/Debug/net8.0/staticwebassets.references.upToDateCheck.txt
+bot borwser/AIBackend/obj/Debug/net8.0/staticwebassets.removed.txt
+bot borwser/AIBackend/obj/Debug/net8.0/ref/AIBackend.dll
+bot borwser/AIBackend/obj/Debug/net8.0/refint/AIBackend.dll
+bot borwser/AIBackend/.vs/AIBackend/FileContentIndex/2654cc85-9359-4ada-aff7-cc06309c8c6f.vsidx
+bot borwser/AIBackend/.vs/AIBackend/FileContentIndex/cf3bd2a6-821a-47d5-a4c0-859c89283a1a.vsidx
+>>>>>>> d7d3972c60cfd0c1abd2486e58bc55259ffd087a
