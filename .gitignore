@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/C#Practice/GhostCoder/GhostCoder/obj
+/C#Practice/GhostCoder/GhostCoder/bin/Debug
+/C#Practice/GhostCoder/GhostCoder/.vs
