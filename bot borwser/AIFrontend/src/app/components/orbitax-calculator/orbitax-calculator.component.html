@@ -1,0 +1,25 @@
+<div class="p-6 bg-white shadow-md rounded-lg w-[400px]">
+  <h2 class="text-xl font-semibold mb-4">Orbitax Global Minimum Tax</h2>
+
+  <label class="block mb-2">Country</label>
+  <select id="country-select" class="w-full p-2 border mb-3 rounded">
+    <option value="">-- Select --</option>
+    <option value="Germany">Germany</option>
+    <option value="USA">USA</option>
+    <option value="France">France</option>
+  </select>
+
+  <label class="block mb-2">Revenue</label>
+  <input id="revenue-input" type="number" class="w-full p-2 border mb-3 rounded" />
+
+  <button
+    id="calculate"
+    (click)="calculate()"
+    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    Calculate
+  </button>
+
+  <div *ngIf="result" class="mt-4 bg-gray-100 p-2 rounded">
+    Result: {{ result }}
+  </div>
+</div>
