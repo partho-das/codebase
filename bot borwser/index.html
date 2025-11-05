@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Orbitax AI-Actor Demo</title>
+  <style>
+    :root{--accent:#0b74de;--bg:#f6f8fb}
+    body{font-family:Inter,Segoe UI,Helvetica,Arial;background:var(--bg);margin:0;padding:20px}
+    .container{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:20px}
+    .card{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(12,24,40,0.06);padding:16px}
+    /* Chat */
+    .chat{height:640px;display:flex;flex-direction:column}
+    .messages{flex:1;overflow:auto;padding:12px;border-radius:8px;background:linear-gradient(180deg,#f8fbff,white)}
+    .message{margin:8px 0;padding:8px 12px;border-radius:12px;max-width:82%}
+    .user{align-self:flex-end;background:linear-gradient(90deg,#dbefff,white);}
+    .bot{align-self:flex-start;background:#f1f6fb}
+    .inputRow{display:flex;gap:8px;margin-top:12px}
+    .inputRow input{flex:1;padding:10px;border-radius:8px;border:1px solid #e3eaf4}
+    .inputRow button{padding:10px 14px;border-radius:8px;border:0;background:var(--accent);color:white}
+    /* Site UI (Orbitax-ish) */
+    .app{padding:12px}
+    h2{margin:6px 0 12px}
+    label{display:block;margin-top:10px;font-size:13px;color:#334}
+    input[type=text], select{width:100%;padding:8px;border-radius:6px;border:1px solid #e3eaf4;margin-top:6px}
+    #calculate{margin-top:12px;padding:10px 14px;background:var(--accent);color:#fff;border:0;border-radius:8px}
+    #results{margin-top:16px;padding:12px;border-radius:8px;background:#f8f9fb;min-height:80px}
+    /* virtual cursor */
+    #ai-cursor{position:fixed;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#00aaff,#004f7a);box-shadow:0 4px 12px rgba(0,120,200,0.3);pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+    /* highlight effect */
+    .ai-hover{box-shadow:0 0 0 4px rgba(11,116,222,0.08);transform:translateY(-2px)}
+    .ai-clicking{transform:scale(0.98);transition:transform .12s}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .controls button{padding:8px 10px;border-radius:8px;border:1px solid #e6eef9;background:white}
+    footer{margin-top:18px;font-size:13px;color:#667}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card chat">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect rx='8' width='36' height='36' fill='%230b74de'/></svg>" alt="bot" style="width:36px;height:36px;border-radius:8px">
+        <div>
+          <div style="font-weight:600">Orbitax Assistant (Demo)</div>
+          <div style="font-size:13px;color:#667">Type natural language then press Send to simulate</div>
+        </div>
+      </div>
+      <div id="messages" class="messages"></div>
+      <div class="inputRow">
+        <input id="chatInput" placeholder="e.g. Calculate global minimum tax for Germany with revenue 1,200,000" />
+        <button id="sendBtn">Send</button>
+      </div>
+      <div class="controls">
+        <button id="btnDemo1">Demo: Germany Calculation</button>
+        <button id="btnDemo2">Demo: Show Explanation</button>
+        <button id="btnStop">Stop Actor</button>
+      </div>
+      <footer>This demo runs locally in your browser. The bot is a simulated backend that returns action commands.</footer>
+    </div>
+
+    <div class="card app">
+      <h2>Orbitax — Global Minimum Tax Calculator (Demo UI)</h2>
+      <div id="tax-form">
+        <label>Country</label>
+        <select id="country-select">
+          <option value="">Select country</option>
+          <option value="Germany">Germany</option>
+          <option value="France">France</option>
+          <option value="USA">USA</option>
+        </select>
+
+        <label>Revenue (local currency)</label>
+        <input id="revenue-input" type="text" placeholder="e.g. 1200000" />
+
+        <label>Effective rate (%)</label>
+        <input id="rate-input" type="text" placeholder="e.g. 13.7" />
+
+        <button id="calculate">Calculate</button>
+
+        <div id="results">Result will appear here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Virtual cursor element (created dynamically by script too) -->
+  <div id="ai-cursor" style="left:20px;top:20px"></div>
+
+  <script>
+  // -------------------------------
+  // Simple AIActor (human-like interactions)
+  // -------------------------------
+  class AIActor {
+    constructor({ speed = 1 } = {}) {
+      this.speed = speed;
+      this.cursor = document.getElementById('ai-cursor') || this._ensureCursor();
+      this._running = true;
+    }
+    _ensureCursor(){
+      let c = document.getElementById('ai-cursor');
+      if (!c){
+        c = document.createElement('div');
+        c.id = 'ai-cursor';
+        document.body.appendChild(c);
+      }
+      return c;
+    }
+    stop(){ this._running = false; }
+    start(){ this._running = true; }
+    async wait(ms){ if(!this._running) throw 'stopped'; return new Promise(r=>setTimeout(r, ms/this.speed)); }
+
+    // smooth move with small randomness and ease
+    async moveTo(selector, opts={duration:800}){
+      const el = document.querySelector(selector);
+      if(!el) throw `moveTo: selector not found ${selector}`;
+      const rect = el.getBoundingClientRect();
+      const tx = rect.left + rect.width/2 + (Math.random()-0.5)*6;
+      const ty = rect.top + rect.height/2 + (Math.random()-0.5)*6;
+      await this._animateTo(tx, ty, opts.duration);
+      await this.wait(150 + Math.random()*200);
+    }
+
+    async _animateTo(x,y,duration=800){
+      const start = this.cursor.getBoundingClientRect();
+      const sx = start.left + start.width/2 || 100;
+      const sy = start.top + start.height/2 || 100;
+      const steps = Math.max(6, Math.floor(duration/16));
+      for(let i=1;i<=steps;i++){
+        if(!this._running) throw 'stopped';
+        const t = i/steps;
+        // easeInOutQuad
+        const ease = t<0.5 ? 2*t*t : -1 + (4-2*t)*t;
+        const nx = sx + (x-sx)*ease + (Math.sin(t*3.14*2)*(1.5));
+        const ny = sy + (y-sy)*ease + (Math.cos(t*3.14*2)*(1.2));
+        this.cursor.style.left = nx + 'px';
+        this.cursor.style.top = ny + 'px';
+        await this.wait(duration/steps);
+      }
+    }
+
+    // hover effect
+    async hover(selector){
+      const el = document.querySelector(selector);
+      if(!el) return;
+      el.classList.add('ai-hover');
+      await this.wait(200+Math.random()*300);
+      el.classList.remove('ai-hover');
+    }
+
+    async click(selector){
+      const el = document.querySelector(selector);
+      if(!el) throw `click: not found ${selector}`;
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      await this.wait(400+Math.random()*300);
+      await this.moveTo(selector, {duration:300+Math.random()*200});
+      el.classList.add('ai-clicking');
+      // small press animation
+      await this.wait(120+Math.random()*200);
+      // trigger native events
+      const evt = new MouseEvent('click', {bubbles:true});
+      el.dispatchEvent(evt);
+      el.classList.remove('ai-clicking');
+      await this.wait(200+Math.random()*200);
+    }
+
+    async type(selector, text){
+      const el = document.querySelector(selector);
+      if(!el) throw `type: not found ${selector}`;
+      await this.moveTo(selector, {duration:300});
+      el.focus();
+      el.value = '';
+      for(const ch of text){
+        if(!this._running) throw 'stopped';
+        el.value += ch;
+        el.dispatchEvent(new Event('input', {bubbles:true}));
+        await this.wait(80 + Math.random()*100);
+      }
+      el.dispatchEvent(new Event('change', {bubbles:true}));
+      await this.wait(200+Math.random()*200);
+    }
+
+    async select(selector, value){
+      const el = document.querySelector(selector);
+      if(!el) throw `select: not found ${selector}`;
+      // if native select
+      if(el.tagName.toLowerCase()==='select'){
+        el.value = value;
+        el.dispatchEvent(new Event('change', {bubbles:true}));
+        // move and click visually
+        await this.moveTo(selector, {duration:300});
+      } else {
+        // for custom dropdowns you might need to open and click an option
+        await this.click(selector);
+        await this.wait(200);
+        const option = Array.from(document.querySelectorAll('li,button,.option-item')).find(o=>o.textContent.trim()===value || o.dataset.value===value);
+        if(option){
+          await this.moveToOptionAndClick(option);
+        }
+      }
+      await this.wait(200+Math.random()*200);
+    }
+
+    async moveToOptionAndClick(optionEl){
+      const rect = optionEl.getBoundingClientRect();
+      await this._animateTo(rect.left + rect.width/2, rect.top + rect.height/2, 300);
+      optionEl.click();
+    }
+  }
+
+  // -------------------------------
+  // Simple simulated "backend" that returns commands based on user text
+  // In your real app, your RAG + OpenAI backend would output similar structured commands
+  // -------------------------------
+  function interpretUserMessage(text){
+    const t = text.toLowerCase();
+    // sample patterns
+    if(t.includes('germany') && t.includes('calculate')){
+      return {
+        reply: 'Okay — I will fill the Germany scenario and calculate.\nI will select Germany, set revenue and press Calculate.',
+        commands: [
+          { action: 'select', selector: '#country-select', value: 'Germany' },
+          { action: 'type', selector: '#revenue-input', value: '1200000' },
+          { action: 'type', selector: '#rate-input', value: '15.8' },
+          { action: 'click', selector: '#calculate' }
+        ]
+      };
+    }
+    if(t.includes('explain') || t.includes('what is')){
+      return {
+        reply: 'The Global Minimum Tax (GloBE) ensures large MNEs pay a minimum tax. I will show a quick explanation box.',
+        commands: [ { action: 'showExplanation' } ]
+      };
+    }
+
+    // fallback: echo and show how to calculate
+    return {
+      reply: 'I can simulate selecting countries, typing revenue, setting rates, and clicking calculate. Try: "Calculate for Germany"',
+      commands: []
+    };
+  }
+
+  // -------------------------------
+  // Hooking up UI and actor
+  // -------------------------------
+  const actor = new AIActor({ speed: 1 });
+  const messagesEl = document.getElementById('messages');
+  function addMessage(text, from='bot'){
+    const div = document.createElement('div');
+    div.className = 'message ' + (from==='user'?'user':'bot');
+    div.innerText = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  document.getElementById('sendBtn').addEventListener('click', async ()=>{
+    const inp = document.getElementById('chatInput');
+    const text = inp.value.trim(); if(!text) return;
+    addMessage(text,'user'); inp.value='';
+    // simulate backend
+    const out = interpretUserMessage(text);
+    addMessage(out.reply,'bot');
+    for(const cmd of out.commands){
+      try{
+        if(cmd.action==='move'){
+          await actor.moveTo(cmd.selector);
+        } else if(cmd.action==='click'){
+          await actor.click(cmd.selector);
+        } else if(cmd.action==='type'){
+          await actor.type(cmd.selector, cmd.value);
+        } else if(cmd.action==='select'){
+          await actor.select(cmd.selector, cmd.value);
+        } else if(cmd.action==='showExplanation'){
+          // small inline explanation
+          const r = document.getElementById('results');
+          r.innerHTML = '<b>GloBE (Global anti-Base Erosion)</b><br>The GloBE rules set a minimum tax to ensure large MNEs pay at least a minimum rate. (Demo text)';
+          await actor.moveTo('#results');
+        }
+      }catch(e){
+        console.warn('actor error', e);
+        addMessage('Actor stopped: '+e,'bot');
+        break;
+      }
+    }
+  });
+
+  // demo buttons
+  document.getElementById('btnDemo1').addEventListener('click', ()=>{
+    document.getElementById('chatInput').value = 'Calculate for Germany with revenue 1200000';
+    document.getElementById('sendBtn').click();
+  });
+  document.getElementById('btnDemo2').addEventListener('click', ()=>{
+    document.getElementById('chatInput').value = 'Explain global minimum tax';
+    document.getElementById('sendBtn').click();
+  });
+  document.getElementById('btnStop').addEventListener('click', ()=>{ actor.stop(); addMessage('Actor stopped','bot'); });
+
+  // make calculate button produce a fake calculation
+  document.getElementById('calculate').addEventListener('click', ()=>{
+    const country = document.getElementById('country-select').value || '—';
+    const rev = document.getElementById('revenue-input').value || '0';
+    const rate = document.getElementById('rate-input').value || '0';
+    const r = document.getElementById('results');
+    const tax = Math.round(Number(rev || 0) * (Number(rate||0)/100));
+    r.innerHTML = `<b>Country:</b> ${country}<br><b>Revenue:</b> ${rev}<br><b>Effective Rate:</b> ${rate}%<br><b>Estimated tax:</b> ${tax.toLocaleString()}`;
+  });
+
+  </script>
+</body>
+</html>
+
