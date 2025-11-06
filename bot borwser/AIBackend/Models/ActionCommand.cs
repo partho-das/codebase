@@ -6,7 +6,8 @@ public class ActionCommand
     public string Selector { get; set; } = ""; // CSS selector on the frontend
 
     public string Value { get; set; } = "";    // e.g. typed text or select value
-    public int DurationMs { get; set; } = 0;   // optional duration hint
+    public int DurationMs { get; set; } = 600;
+
 }
 public enum CommandType
 {

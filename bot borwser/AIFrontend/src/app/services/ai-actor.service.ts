@@ -2,6 +2,14 @@ import { Injectable } from '@angular/core';
 import { gsap } from 'gsap';
 import { ActionCommand } from './ai.service';
 
+export enum ActionType {
+  Move = 0,
+  Click = 1,
+  Type = 2,
+  Select = 3,
+  Scroll = 4
+}
+
 @Injectable({ providedIn: 'root' })
 export class AiActorService {
   private cursorEl!: HTMLElement;
@@ -17,38 +25,56 @@ export class AiActorService {
   async runActions(actions: ActionCommand[]) {
     for (const action of actions) {
       switch (action.type) {
-        case 'move':
-          this.moveTo(action.selector!, action.durationMs ?? 600);
-          await this.wait(action.durationMs ?? 600);
+        case ActionType.Move:
+          await this.moveTo(action.selector!, action.durationMs ?? 600);
           break;
 
-        case 'click':
+        case ActionType.Click:
           this.click(action.selector!);
           break;
 
-        case 'type':
+        case ActionType.Type:
           await this.typeText(action.selector!, action.value ?? '');
           break;
 
-        case 'select':
+        case ActionType.Select:
           this.selectValue(action.selector!, action.value ?? '');
           break;
 
-        case 'scroll':
+        case ActionType.Scroll:
           window.scrollTo({ top: Number(action.value) || 0, behavior: 'smooth' });
           break;
       }
     }
   }
+  private moveTo(selector: string, duration: number) : Promise<void> {
+    return new Promise( resolve => {
+      const el = document.querySelector(selector) as HTMLElement;
+      if (!el) return;
 
-  private moveTo(selector: string, duration: number) {
-    const el = document.querySelector(selector) as HTMLElement;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    gsap.to(this.cursorEl, { x, y, duration: duration / 1000, ease: 'power2.out' });
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      // Get current cursor position
+      const current = this.cursorEl.getBoundingClientRect();
+      const dx = x - (current.left + current.width / 2);
+      const dy = y - (current.top + current.height / 2);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Adjust duration dynamically for smoother effect
+      const adjustedDuration = Math.min(Math.max(distance / 400, 0.6), 1.5);
+
+      gsap.to(this.cursorEl, {
+        x,
+        y,
+        duration: adjustedDuration,
+        ease: 'power2.inOut',
+        onComplete: ()=> resolve(),
+      });
+    });
   }
+
 
   private click(selector: string) {
     const el = document.querySelector(selector) as HTMLElement;

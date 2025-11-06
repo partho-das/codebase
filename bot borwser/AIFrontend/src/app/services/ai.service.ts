@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ActionType } from './ai-actor.service';
 
 export interface ActionCommand {
-  type: string;
+  type: ActionType;
   selector?: string;
   value?: string;
   durationMs?: number;

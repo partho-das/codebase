@@ -24,13 +24,17 @@ namespace AIBackend.Services
                 }
                 Rules:
                 - Output only JSON, nothing else.
+                - Also Move is important to move between selector to show ui interaction with mouse.
                 - Keep reply short (1-2 sentences).
                 - Use selectors that match the target UI (e.g. '#country-select', '#revenue-input', '#calculate').
                 - If no UI action is needed, return an empty actions array.
                 Example:
                 { ""reply"": ""Filling Germany and calculating."",
-                  ""actions"": [{""type"":""select"",""selector"":""#country-select"",""value"":""Germany""},
+                  ""actions"": [{""type"":""move"",""selector"":""#country-select""},
+                                {""type"":""select"",""selector"":""#country-select"",""value"":""Germany""},
+                                {""type"":""move"",""selector"":""#revenue-input""},
                                 {""type"":""type"",""selector"":""#revenue-input"",""value"":""1200000""},
+                                {""type"":""move"",""selector"":""#calculate""},
                                 {""type"":""click"",""selector"":""#calculate""}]
                 }
                 Now produce the JSON output for the user's request above.";
