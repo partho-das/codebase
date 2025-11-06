@@ -1,0 +1,12 @@
+:host {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 320px;
+  height: 400px;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 999;
+}

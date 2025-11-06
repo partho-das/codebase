@@ -12,4 +12,5 @@ import {ChatPanelComponent} from './components/chat-panel/chat-panel.component';
 })
 export class AppComponent {
   title = 'AIFrontend';
+  showChat: boolean = true;
 }
