@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 
 
 export interface CardData {
-  id: string;
+  id: number;
   title: string;
   description: string;
   image: string;
@@ -20,7 +20,7 @@ export class DataService {
   getCards(): Observable<CardData[]>{
     return this.http.get<CardData[]>(`${this.baseUrl}/cards`);
   }
-  getCardDetails(id: string): Observable<CardData> {
+  getCardDetails(id: number): Observable<CardData> {
     return this.http.get<CardData>(`${this.baseUrl}/cards/${id}`);
   }
 }
