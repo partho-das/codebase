@@ -1,25 +1,20 @@
-<div class="p-6 bg-white shadow-md rounded-lg w-[400px]">
-  <h2 class="text-xl font-semibold mb-4">Orbitax Global Minimum Tax</h2>
+<div class="p-4 bg-gray-50 rounded shadow">
+  <h3 class="text-lg font-semibold mb-2">Orbitax Global Minimum Tax</h3>
 
-  <label class="block mb-2">Country</label>
-  <select id="country-select" class="w-full p-2 border mb-3 rounded">
+  <label>Country</label>
+  <select [(ngModel)]="country" class="border p-1 w-full mb-2" id="country-select">
     <option value="">-- Select --</option>
     <option value="Germany">Germany</option>
     <option value="USA">USA</option>
     <option value="France">France</option>
   </select>
 
-  <label class="block mb-2">Revenue</label>
-  <input id="revenue-input" type="number" class="w-full p-2 border mb-3 rounded" />
+  <label>Revenue</label>
+  <input [(ngModel)]="revenue" type="number" class="border p-1 w-full mb-2" id="revenue-input"/>
 
-  <button
-    id="calculate"
-    (click)="calculate()"
-    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-    Calculate
-  </button>
+  <button (click)="calculate()" class="bg-blue-600 text-white px-3 py-1 rounded" id="calculate">Calculate</button>
 
-  <div *ngIf="result" class="mt-4 bg-gray-100 p-2 rounded">
-    Result: {{ result }}
+  <div *ngIf="result" class="mt-2 bg-gray-100 p-2 rounded">
+    {{ result }}
   </div>
 </div>

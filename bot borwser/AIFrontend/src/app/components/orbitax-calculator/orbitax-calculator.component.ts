@@ -1,16 +1,19 @@
 import { Component } from '@angular/core';
 import {NgIf} from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-orbitax-calculator',
   templateUrl: './orbitax-calculator.component.html',
   imports: [
-    NgIf
+    NgIf, FormsModule
   ],
   standalone: true
 })
 export class OrbitaxCalculatorComponent {
   result = '';
+revenue: any;
+country: any;
 
   calculate() {
     const country = (document.getElementById('country-select') as HTMLSelectElement).value;

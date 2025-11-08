@@ -13,6 +13,7 @@ export enum ActionType {
 @Injectable({ providedIn: 'root' })
 export class AiActorService {
   private cursorEl!: HTMLElement;
+  private defaultDuraton: number = 600;
 
   initCursor() {
     this.cursorEl = document.createElement('div');
@@ -30,7 +31,7 @@ export class AiActorService {
           break;
 
         case ActionType.Click:
-          this.click(action.selector!);
+          await this.click(action.selector!);
           break;
 
         case ActionType.Type:
@@ -38,7 +39,7 @@ export class AiActorService {
           break;
 
         case ActionType.Select:
-          this.selectValue(action.selector!, action.value ?? '');
+          await this.selectValue(action.selector!, action.value ?? '');
           break;
 
         case ActionType.Scroll:
@@ -76,12 +77,14 @@ export class AiActorService {
   }
 
 
-  private click(selector: string) {
+  private async click(selector: string) {
+    await this.moveTo(selector, this.defaultDuraton);
     const el = document.querySelector(selector) as HTMLElement;
     el?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
   }
 
   private async typeText(selector: string, text: string) {
+    await this.moveTo(selector, this.defaultDuraton);
     const el = document.querySelector(selector) as HTMLInputElement | null;
     if (!el) return;
     el.focus();
@@ -93,7 +96,8 @@ export class AiActorService {
     }
   }
 
-  private selectValue(selector: string, value: string) {
+  private async selectValue(selector: string, value: string) {
+    await this.moveTo(selector, this.defaultDuraton);
     const el = document.querySelector(selector) as HTMLSelectElement | null;
     if (!el) return;
     el.value = value;

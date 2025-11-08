@@ -25,7 +25,7 @@ public class HuggingFaceChatClient : IAiService
     public async Task<AiResponse> AnalyzeAsync(AiRequest request)
     {
         // Construct a prompt instructing the model to return strict JSON
-        var prompt = PromptHelpers.BuildPrompt(request.Message);
+        var prompt = PromptHelpers.BuildPrompt(request);
 
         var body = new
         {

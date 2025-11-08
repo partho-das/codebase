@@ -1,8 +1,6 @@
 import { Routes } from '@angular/router';
-import { CardListComponent } from './components/card-list/card-list.component';
-import { DetailPageComponent } from './components/detail-page/detail-page.component';
 
 export const routes: Routes = [
-    { path: '', component: CardListComponent },
-    { path: 'detail/:id', component: DetailPageComponent }
+    { path: '', loadComponent: () => import('./components/card-list/card-list.component').then(m => m.CardListComponent) },
+    { path: 'detail/:id', loadComponent: () => import('./components/detail-page/detail-page.component').then(m => m.DetailPageComponent) }
 ];

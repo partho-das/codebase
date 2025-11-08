@@ -41,7 +41,7 @@ public class DataController : ControllerBase
             id,
             title = $"Detail for Card #{id}",
             description = "Here the backend sends more details for the selected topic.",
-            image = $"{baseUrl}/images/detail.jpg"
+            image = $"{baseUrl}/images/tax{id}.jpg"
         });
     }
 }

@@ -5,38 +5,37 @@ namespace AIBackend.Services
 {
     public static  class PromptHelpers
     {
-        public static string BuildPrompt(string userMessage)
+        public static string BuildPrompt(AiRequest userMessage)
         { 
             var instructions = @"
                 You are an assistant for a web UI (Orbitax tax calculator). The user asked: 
-                """ + userMessage + @"""
+                """ + userMessage.Message + $@"""
+                And this is the the ui looks like: 
+                ""{userMessage.SnapshotString}""
+                -------------Instructions-----------
                 You MUST output valid JSON only (no extra text). The JSON must have:
-                {
+                {{
                   ""reply"": ""<text for chat UI (short)>"",
                   ""actions"": [
-                    {
+                    {{
                       ""type"": ""move|click|type|select|scroll|showExplanation"",
                       ""selector"": ""<css selector on page, optional for showExplanation>"",
                       ""value"": ""<text to type or value to select>"",
                       ""durationMs"": <integer, optional>
-                    }
+                    }}
                   ]
-                }
+                }}
                 Rules:
                 - Output only JSON, nothing else.
-                - Also Move is important to move between selector to show ui interaction with mouse.
                 - Keep reply short (1-2 sentences).
                 - Use selectors that match the target UI (e.g. '#country-select', '#revenue-input', '#calculate').
                 - If no UI action is needed, return an empty actions array.
-                Example:
-                { ""reply"": ""Filling Germany and calculating."",
-                  ""actions"": [{""type"":""move"",""selector"":""#country-select""},
-                                {""type"":""select"",""selector"":""#country-select"",""value"":""Germany""},
-                                {""type"":""move"",""selector"":""#revenue-input""},
-                                {""type"":""type"",""selector"":""#revenue-input"",""value"":""1200000""},
-                                {""type"":""move"",""selector"":""#calculate""},
-                                {""type"":""click"",""selector"":""#calculate""}]
-                }
+                Example( this are just example only relay on the send ui):
+                {{ ""reply"": ""Filling Germany and calculating."",
+                  ""actions"": [{{""type"":""select"",""selector"":""#country-select"",""value"":""Germany""}},
+                                {{""type"":""type"",""selector"":""#revenue-input"",""value"":""1200000""}},
+                                {{""type"":""click"",""selector"":""#calculate""}}]
+                }}
                 Now produce the JSON output for the user's request above.";
 
             return instructions;

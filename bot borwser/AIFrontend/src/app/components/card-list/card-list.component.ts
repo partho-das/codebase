@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DataService, CardData } from '../../services/data.service';
+import { OrbitaxCalculatorComponent } from "../orbitax-calculator/orbitax-calculator.component";
 
 @Component({
   selector: 'app-card-list',
@@ -12,6 +13,7 @@ import { DataService, CardData } from '../../services/data.service';
 export class CardListComponent implements OnInit {
   cards: CardData[] = [];
   loading = true;
+  orbitax = OrbitaxCalculatorComponent;
 
   constructor(private data: DataService, private router: Router) {}
 
