@@ -34,7 +34,7 @@ public class HuggingFaceChatClient : IAiService
             {
                 new { role = "user", content = prompt }
             },
-            max_tokens = 200,
+            max_tokens = 1000,
             temperature = 0.2
         };
 

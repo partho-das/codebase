@@ -3,11 +3,13 @@ import { gsap } from 'gsap';
 import { ActionCommand } from './ai.service';
 
 export enum ActionType {
-  Move = 0,
-  Click = 1,
-  Type = 2,
-  Select = 3,
-  Scroll = 4
+  Move = "Move",
+  Click = "Click",
+  Type = "Type",
+  Select = "Select",
+  Scroll = "Scroll",
+  Wait = "Wait",
+  ShowExplanation = "ShowExplanation"
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,21 +31,20 @@ export class AiActorService {
         case ActionType.Move:
           await this.moveTo(action.selector!, action.durationMs ?? 600);
           break;
-
         case ActionType.Click:
           await this.click(action.selector!);
           break;
-
         case ActionType.Type:
           await this.typeText(action.selector!, action.value ?? '');
           break;
-
         case ActionType.Select:
           await this.selectValue(action.selector!, action.value ?? '');
           break;
-
         case ActionType.Scroll:
           window.scrollTo({ top: Number(action.value) || 0, behavior: 'smooth' });
+          break;
+        case ActionType.Wait:
+          await this.wait(action.durationMs ?? 600);
           break;
       }
     }

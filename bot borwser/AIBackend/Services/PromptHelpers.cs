@@ -6,37 +6,50 @@ namespace AIBackend.Services
     public static  class PromptHelpers
     {
         public static string BuildPrompt(AiRequest userMessage)
-        { 
-            var instructions = @"
-                You are an assistant for a web UI (Orbitax tax calculator). The user asked: 
-                """ + userMessage.Message + $@"""
-                And this is the the ui looks like: 
-                ""{userMessage.SnapshotString}""
-                -------------Instructions-----------
-                You MUST output valid JSON only (no extra text). The JSON must have:
-                {{
-                  ""reply"": ""<text for chat UI (short)>"",
-                  ""actions"": [
-                    {{
-                      ""type"": ""move|click|type|select|scroll|showExplanation"",
-                      ""selector"": ""<css selector on page, optional for showExplanation>"",
-                      ""value"": ""<text to type or value to select>"",
-                      ""durationMs"": <integer, optional>
-                    }}
-                  ]
-                }}
-                Rules:
-                - Output only JSON, nothing else.
-                - Keep reply short (1-2 sentences).
-                - Use selectors that match the target UI (e.g. '#country-select', '#revenue-input', '#calculate').
-                - If no UI action is needed, return an empty actions array.
-                Example( this are just example only relay on the send ui):
-                {{ ""reply"": ""Filling Germany and calculating."",
-                  ""actions"": [{{""type"":""select"",""selector"":""#country-select"",""value"":""Germany""}},
-                                {{""type"":""type"",""selector"":""#revenue-input"",""value"":""1200000""}},
-                                {{""type"":""click"",""selector"":""#calculate""}}]
-                }}
-                Now produce the JSON output for the user's request above.";
+        {
+            var instructions = $@"
+                        You are an AI assistant that controls a dynamic web UI.
+                        The user said:
+                        \""{ userMessage.Message}\""
+
+                        Here is the current snapshot of the page’s DOM (this may change frequently):
+                        \""{ userMessage.SnapshotString}\""
+
+                        -----------Instructions-----------
+                        You must respond with **valid JSON only** (no extra text, no markdown).
+
+                        JSON format:
+                        {{
+                          ""reply"": ""<short user-facing message (1–2 sentences)>"",
+                          ""actions"": [
+                            {{
+                              ""type"": ""click | type | select | scroll | move | wait | showExplanation"",
+                              ""selector"": ""<CSS selector identifying the element on the current page>"",
+                              ""value"": ""<text or selection value if needed>"",
+                              ""durationMs"": <integer, optional for move/scroll/wait>
+                            }}
+                          ]
+                        }}
+
+                        Rules:
+                        - Use the provided DOM snapshot to infer selectors (e.g. use element IDs, text labels, or visible attributes).
+                        - Only include actions that exist in the current UI.
+                        - If you can’t find a clear element, skip that action (never hallucinate selectors).
+                        - If the user request is informational (no UI action), return an empty `actions` array.
+                        - Prefer stable selectors (IDs, data attributes, clear class names).
+                        - Combine multiple user intents into sequential actions when needed.
+                        - Never output anything other than the JSON.
+
+                        Example (purely illustrative — do not rely on these IDs):
+                        {{
+                          ""reply"": ""Setting country and calculating."",
+                          ""actions"": [
+                            {{ ""type"": ""select"", ""selector"": ""#country-dropdown"", ""value"": ""Germany"" }},
+                            {{ ""type"": ""type"", ""selector"": ""#revenue-input"", ""value"": ""1200000"" }},
+                            {{ ""type"": ""click"", ""selector"": ""#calculate"" }}
+                          ]
+                        }}
+                        ";
 
             return instructions;
         }

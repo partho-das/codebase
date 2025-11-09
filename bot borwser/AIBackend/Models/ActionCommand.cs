@@ -1,4 +1,6 @@
-﻿namespace AIBackend.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace AIBackend.Models;
 
 public class ActionCommand
 {
@@ -9,6 +11,9 @@ public class ActionCommand
     public int DurationMs { get; set; } = 600;
 
 }
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+
 public enum CommandType
 {
     Move,
@@ -16,5 +21,6 @@ public enum CommandType
     Type,
     Select,
     Scroll,
+    Wait,
     ShowExplanation
 }
