@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AiResponse, AiService } from '../../services/ai.service';
+import {ActionCommand, AiResponse, AiService} from '../../services/ai.service';
 import { AiActorService } from '../../services/ai-actor.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf} from '@angular/common';
@@ -22,6 +22,12 @@ export class ChatPanelComponent implements OnInit {
 
   ngOnInit() {
     this.actor.initCursor();
+    this.ai.subscribe('partho_ai_chat', (res: any) => {
+      let data : AiResponse = JSON.parse(res);
+      console.log("Socket Data:"  + JSON.stringify(data));
+      this.messages.push({sender: 'ai', text: data.replyText});
+      this.actor.runActions(data.actions);
+    });
   }
 
   send() {
@@ -31,13 +37,7 @@ export class ChatPanelComponent implements OnInit {
     this.input = '';
 
     this.uiCapService.requestAiActon(msg).subscribe({
-      next: (res: AiResponse) => {
-        this.messages.push({ sender: 'ai', text: res.replyText });
-        this.actor.runActions(res.actions);
-      },
-      error: (err) => {
-        this.messages.push({ sender: 'ai', text: 'Error: ' + err.message });
-      },
+      next: (res) => {console.log("https Response: " + res)}
     });
   }
 }

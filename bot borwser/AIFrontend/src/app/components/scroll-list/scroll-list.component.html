@@ -1,0 +1,21 @@
+<div class="flex flex-col h-[400px] w-[300px] bg-gray-50 p-4 rounded-lg shadow">
+  <div
+    #scrollContainer
+    class="flex-1 overflow-y-auto mb-3"
+    (scroll)="onScroll()"
+  >
+    "movie items"
+    <div *ngFor="let item of items" class="mb-2">
+      <a
+        (click)="openItem(item)"
+        class="text-blue-600 hover:underline cursor-pointer"
+      >
+        {{ item.title }}
+      </a>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-2 text-gray-500">
+      Loading more...
+    </div>
+  </div>
+</div>

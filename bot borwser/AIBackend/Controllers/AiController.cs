@@ -1,5 +1,6 @@
 ﻿using AIBackend.AIClient;
 using AIBackend.Models;
+using AIBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIBackend.Controllers;
@@ -9,11 +10,13 @@ namespace AIBackend.Controllers;
 [Route("api/ai")]
 public class AiController : ControllerBase
 {
-    public readonly IAiService _ai;
+    private readonly IAiService _ai;
+    private readonly CentrifugoService _centrifugo;
 
-    public AiController(IAiService ai)
+    public AiController(IAiService ai, CentrifugoService centrifugo)
     {
         _ai = ai;
+        _centrifugo = centrifugo;
     }
 
     [HttpPost("agent")]
@@ -22,6 +25,7 @@ public class AiController : ControllerBase
         if (req == null || string.IsNullOrWhiteSpace(req.Message))
             return BadRequest("message required");
         var res = await _ai.AnalyzeAsync(req);
+        await _centrifugo.PublishAsync("partho_ai_chat", res);
         return Ok(res);
     }
 }

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { DataService, CardData } from '../../services/data.service';
 import { AiService } from '../../services/ai.service';
+import {ScrollListComponent} from '../scroll-list/scroll-list.component';
 
 @Component({
   selector: 'app-detail-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ScrollListComponent],
   templateUrl: './detail-page.component.html'
 })
 export class DetailPageComponent implements OnInit {

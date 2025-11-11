@@ -1,5 +1,6 @@
 using AIBackend.AIClient;
 using AIBackend.Config;
+using AIBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddHttpClient();
 
 var provider  = builder.Configuration["AI:Provider"]?.ToLower() ?? "huggingface";
 builder.Services.AddSingleton<IAiService, HuggingFaceChatClient>();
+builder.Services.AddSingleton<CentrifugoService>();
 
 var app = builder.Build();
 

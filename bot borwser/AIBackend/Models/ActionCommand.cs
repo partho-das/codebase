@@ -13,7 +13,6 @@ public class ActionCommand
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-
 public enum CommandType
 {
     Move,
