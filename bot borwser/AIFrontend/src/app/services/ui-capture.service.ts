@@ -3,7 +3,7 @@ import { HttpClient, HttpContext } from "@angular/common/http";
 import { AiResponse } from "./ai.service";
 
 export interface UiElementSnapshot {
-  logicalId?: string; 
+  logicalId?: string;
   tag: string;
   text?: string;
   placeholder?: string;
@@ -18,10 +18,10 @@ export interface UiElementSnapshot {
 @Injectable({providedIn: 'root'})
 export class UiCaptureService{
   constructor(private http: HttpClient){}
-  
+
 
   capture(): UiElementSnapshot[] {
-    const sel = 'button,input,select,textarea,[data-ai]';
+    const sel = 'button,input,select,textarea,body,div,span,[data-ai]';
     const els = Array.from(document.querySelectorAll(sel));
     return els.map((el): UiElementSnapshot => {
       const r = (el as HTMLElement).getBoundingClientRect();
