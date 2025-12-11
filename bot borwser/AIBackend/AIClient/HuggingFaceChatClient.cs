@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using AIBackend.Ai.Tools;
 using AIBackend.Models;
 using AIBackend.Services;
 using Newtonsoft.Json;
@@ -12,9 +14,12 @@ public class HuggingFaceChatClient : IAiService
     private readonly HttpClient _http;
     private readonly string _apiKey;
     private readonly string _model;
+    private readonly ToolRegistry _toolRegistry;
 
-    public HuggingFaceChatClient(HttpClient http, IConfiguration cfg)
+
+    public HuggingFaceChatClient(HttpClient http, IConfiguration cfg, ToolRegistry toolRegistry)
     {
+        _toolRegistry = toolRegistry;
         _http = http;
         _apiKey = cfg["AI:HuggingFace:ApiKey"] ?? Environment.GetEnvironmentVariable("HF_API_KEY");
         _model = cfg["AI:HuggingFace:Model"] ?? "tiiuae/falcon-7b-instruct";
@@ -22,10 +27,9 @@ public class HuggingFaceChatClient : IAiService
             throw new ArgumentException("HuggingFace API key not configured. Set AI:HuggingFace:ApiKey or HF_API_KEY.");
     }
 
-    public async Task<AiResponse> AnalyzeAsync(AiRequest request)
+    public async IAsyncEnumerable<AiResponse> AnalyzeAsync(AiRequest request)
     {
-        // Construct a prompt instructing the model to return strict JSON
-        var prompt = PromptHelpers.BuildPrompt(request);
+        var prompt = PromptHelpers.BasicBuildPrompt(request);
 
         var body = new
         {
@@ -34,8 +38,16 @@ public class HuggingFaceChatClient : IAiService
             {
                 new { role = "user", content = prompt }
             },
-            max_tokens = 200,
-            temperature = 0.2
+            functions = _toolRegistry.AllTools.Select(t => new
+            {
+                name = t.Name,
+                description = t.Description,
+                parameters = t.Schema
+            }).ToList(),
+            tool_choice = "auto",
+            max_tokens = 500,
+            temperature = 0.2,
+            stream = true
         };
 
         var jsonBody = JsonConvert.SerializeObject(body);
@@ -46,27 +58,105 @@ public class HuggingFaceChatClient : IAiService
 
         req.Headers.Add("Authorization", $"Bearer {_apiKey}");
 
-        using var resp = await _http.SendAsync(req);
-        resp.EnsureSuccessStatusCode();
+        using var response = await _http.SendAsync(req);
+        Console.WriteLine(await response.Content.ReadAsStringAsync());
+       // response.EnsureSuccessStatusCode();
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream, Encoding.UTF8);
 
-        var str = await resp.Content.ReadAsStringAsync();
+        string accumulatedText = "";
 
-        // Hugging Face returns an array of dicts for some models; try to extract text
-        // Many inference endpoints return: [{"generated_text":"..."}]
-        string modelOutput = str;
-        try
+        while (!reader.EndOfStream)
         {
-            var json = JsonConvert.DeserializeObject<dynamic>(str);
-            if (json?["choices"] != null && json["choices"].Count > 0)
+            var line = await reader.ReadLineAsync();
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            if (line.Contains("tool"))
             {
-                modelOutput = (string)json["choices"][0]["message"]["content"];
+                var x = 5;
+            }
+            if (line.StartsWith("data: "))
+            {
+                var jsonPart = line.Substring("data: ".Length);
+                if (jsonPart == "[DONE]") break;
+
+                using var doc = JsonDocument.Parse(jsonPart);
+                var root = doc.RootElement;
+
+                if (!root.TryGetProperty("choices", out var choicesElem) || choicesElem.GetArrayLength() == 0)
+                    continue;
+
+                var delta = choicesElem[0].GetProperty("delta");
+
+                // Append AI text if available
+                if (delta.TryGetProperty("content", out var contentElement))
+                {
+                    yield return new AiResponse
+                    {
+                        ReplyText = contentElement.GetString(),
+                        Type = AiResponse.ResponseType.NormalResponse,
+                        Actions = new List<ActionCommand>()
+                    };
+                }
+
+                if (delta.TryGetProperty("reasoning", out var reasoning))
+                {
+                    yield return new AiResponse
+                    {
+                        ReplyText = reasoning.GetString(),
+                        Type = AiResponse.ResponseType.Reasoning,
+                        Actions = new List<ActionCommand>()
+                    };
+                }
+
+                if (delta.TryGetProperty("thinking", out var thinking))
+                {
+                    yield return new AiResponse
+                    {
+                        ReplyText = thinking.GetString(),
+                        Type = AiResponse.ResponseType.Thinking,
+                        Actions = new List<ActionCommand>()
+                    };
+                }
+                if (delta.TryGetProperty("tool_calls", out var toolCallsElem) && toolCallsElem.ValueKind == JsonValueKind.Array)
+                {
+                    var y = JsonNode.Parse(toolCallsElem.GetRawText()).AsArray();
+                    foreach (var toolCall in y)
+                    {
+                        var toolName = toolCall?["function"]?["name"]?.GetValue<string>();
+                        var argumentsJson = toolCall?["function"]?["arguments"]?.GetValue<string>();
+
+                        var tool = _toolRegistry.GetTool(toolName);
+                        if (tool != null)
+                        {
+                            // Deserialize to object dynamically 
+                            var result = await tool.ExecuteAsync(argumentsJson);
+                            yield return new AiResponse
+                            {
+                                ReplyText = JsonSerializer.Serialize(result),
+                                Type = AiResponse.ResponseType.NormalResponse,
+                                Actions = new List<ActionCommand>()
+                            };
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Tool {toolName} not found in registry.");
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                // Fallback: append raw line
+                accumulatedText += line;
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error parsing model output: " + ex.Message);
-        }
 
-        return PromptHelpers.ParseModelOutput(modelOutput);
+        yield return new AiResponse
+        {
+            ReplyText = accumulatedText,
+            Actions = new List<ActionCommand>()
+        };
     }
 }

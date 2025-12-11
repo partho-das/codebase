@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { AiResponse, AiService } from '../../services/ai.service';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { AiResponse, AiService, ResponseType } from '../../services/ai.service';
 import { AiActorService } from '../../services/ai-actor.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf} from '@angular/common';
@@ -14,30 +14,49 @@ import { UiCaptureService } from '../../services/ui-capture.service';
   ],
   templateUrl: './chat-panel.component.html'
 })
-export class ChatPanelComponent implements OnInit {
-  messages: { sender: 'user' | 'ai'; text: string }[] = [];
+export class ChatPanelComponent{
+  @ViewChild('chatWindow') chatWindow!: ElementRef;
+
+  userMessages: { text: string }[] = [];
+  reasoningMessages: { text: string }[] = [];
+  normalMessages: { text: string }[] = [];
   input = '';
 
-  constructor(private ai: AiService, private actor: AiActorService, private uiCapService: UiCaptureService) {}
+  constructor(private aiService: AiService) {}
 
-  ngOnInit() {
-    this.actor.initCursor();
-  }
-
-  send() {
+  async send() {
     const msg = this.input.trim();
     if (!msg) return;
-    this.messages.push({ sender: 'user', text: msg });
+
+    this.userMessages.push({ text: msg });
     this.input = '';
 
-    this.uiCapService.requestAiActon(msg).subscribe({
-      next: (res: AiResponse) => {
-        this.messages.push({ sender: 'ai', text: res.replyText });
-        this.actor.runActions(res.actions);
+     const stream$ = await this.aiService.startStream(msg);
+  if (!stream$) return;
+
+    stream$.subscribe({
+      next: (chunk: AiResponse) => {
+        if (chunk.Type == ResponseType.Reasoning) {
+          this.reasoningMessages.push({ text: chunk.ReplyText });
+        } else {
+          this.normalMessages.push({ text: chunk.ReplyText });
+        }
+
+        this.scrollToBottom();
       },
       error: (err) => {
-        this.messages.push({ sender: 'ai', text: 'Error: ' + err.message });
+        this.normalMessages.push({ text: 'Error: ' + err.message });
+        this.scrollToBottom();
       },
     });
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      if (this.chatWindow) {
+        const el = this.chatWindow.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      }
+    }, 50);
   }
 }

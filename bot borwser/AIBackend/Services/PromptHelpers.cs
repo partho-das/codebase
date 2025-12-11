@@ -103,5 +103,17 @@ namespace AIBackend.Services
             }
             return null!;
         }
+
+        public static string BasicBuildPrompt(AiRequest userMessage)
+        {
+            var prompt = $@"
+            You are an AI assistant.
+            The user asked:
+            ""{userMessage.Message}""
+
+            Provide a short, clear, and helpful response.";
+
+            return prompt;
+        }
     }
 }

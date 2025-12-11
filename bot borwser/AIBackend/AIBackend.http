@@ -1,6 +1,16 @@
-@AIBackend_HostAddress = http://localhost:5075
+@AIBackend_HostAddress = http://localhost:5001
 
 GET {{AIBackend_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+
+POST https://localhost:5001/api/ai/chat
+Accept: application/json
+
+Content-Type: application/json
+{
+    "Message": "HI"
+}
+

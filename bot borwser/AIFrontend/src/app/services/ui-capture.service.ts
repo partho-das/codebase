@@ -43,7 +43,7 @@ export class UiCaptureService{
   requestAiActon(message: string){
     const snapshot = this.capture();
     const snapshotString = JSON.stringify(snapshot);
-    return this.http.post<AiResponse>("/api/ai/agent/", {message, snapshotString});
+    return this.http.post<AiResponse>("/api/ai/chat/", {message, snapshotString});
   }
 
 }

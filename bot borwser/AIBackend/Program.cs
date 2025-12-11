@@ -1,5 +1,8 @@
+using AIBackend.Ai.Tools;
 using AIBackend.AIClient;
 using AIBackend.Config;
+using AIBackend.Interfaces;
+using AIBackend.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +18,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 
 var provider  = builder.Configuration["AI:Provider"]?.ToLower() ?? "huggingface";
-builder.Services.AddSingleton<IAiService, HuggingFaceChatClient>();
+if (provider == "huggingface")
+    builder.Services.AddSingleton<IAiService, HuggingFaceChatClient>();
+else builder.Services.AddSingleton<IAiService, OllamaChatClient>();
+
+builder.Services.AddSingleton<IAiSessionStore, AiSessionStore>();
+
+builder.Services.AddSingleton<ToolRegistry>(sp =>
+    {
+        var registry = new ToolRegistry();
+        registry.Register(new GetWeatherTool());
+        registry.Register(new CalculateSumTool());
+        return registry;
+    });
 
 var app = builder.Build();
 
