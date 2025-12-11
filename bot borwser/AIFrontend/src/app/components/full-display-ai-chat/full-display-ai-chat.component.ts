@@ -7,6 +7,7 @@ import { CommonModule, NgForOf } from '@angular/common';
 interface AiMessage{
   reasoningText : string;
   normalText : string;
+  userInput: string;
 }
 @Component({
   selector: 'app-full-display-ai-chat',
@@ -16,7 +17,6 @@ interface AiMessage{
   styleUrl: './full-display-ai-chat.component.scss'
 })
 export class FullDisplayAiChatComponent {
-  userMessages: { text: string }[] = [];
   aiMessages: AiMessage[] = [];
   input = '';
 
@@ -25,11 +25,9 @@ export class FullDisplayAiChatComponent {
   async send() {
     const msg = this.input.trim();
     if (!msg) return;
+    let aiResponse: AiMessage = {reasoningText: "", normalText: "", userInput: msg};
 
-    this.userMessages.push({ text: msg });
     this.input = '';
-
-    let aiResponse: AiMessage = {reasoningText: "", normalText: ""};
 
     const stream$ = await this.aiService.startStream(msg);
     if (!stream$) return;
@@ -57,7 +55,7 @@ export class FullDisplayAiChatComponent {
 
       },
       error: (err) => {
-        this.aiMessages.push({ reasoningText: "Error: By Stestem", normalText: 'Error: ' + err.message });
+        this.aiMessages.push({ userInput: msg,  reasoningText: "Error: By Stestem", normalText: 'Error: ' + err.message });
       },
     });
   }

@@ -45,8 +45,8 @@ public class HuggingFaceChatClient : IAiService
                 parameters = t.Schema
             }).ToList(),
             tool_choice = "auto",
-            max_tokens = 500,
-            temperature = 0.2,
+            max_tokens = 1000,
+            temperature = 0.3,
             stream = true
         };
 

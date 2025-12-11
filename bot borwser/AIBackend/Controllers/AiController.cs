@@ -61,7 +61,7 @@ public class AiController : ControllerBase
             await Response.Body.FlushAsync(ct);
 
 
-            //await Task.Delay(200, ct);
+            await Task.Delay(50, ct);
             if (ct.IsCancellationRequested)
                 break;
 
