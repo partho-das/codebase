@@ -19,7 +19,7 @@ namespace AIBackend.AIClient
             _model = cfg["AI:Ollama:Model"] ?? "llama2";
             _baseUrl = cfg["AI:Ollama:BaseUrl"] ?? "http://localhost:11434";
         }
-        public async IAsyncEnumerable<AiResponse> AnalyzeAsync(AiRequest request)
+        public async IAsyncEnumerable<AiResponse?> AnalyzeAsync(AiRequest request)
         {
             var prompt = PromptHelpers.BasicBuildPrompt(request);
 

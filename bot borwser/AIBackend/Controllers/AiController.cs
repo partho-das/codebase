@@ -52,7 +52,7 @@ public class AiController : ControllerBase
 
         await foreach (var chunk in _ai.AnalyzeAsync(req).WithCancellation(ct))
         {
-            if(string.IsNullOrEmpty(chunk.ReplyText) || string.IsNullOrWhiteSpace(chunk.ReplyText))
+            if(chunk == null || string.IsNullOrEmpty(chunk.ReplyText) || string.IsNullOrWhiteSpace(chunk.ReplyText))
                 continue;
             var json = JsonSerializer.Serialize(chunk);
 

@@ -4,5 +4,5 @@ namespace AIBackend.AIClient;
 
 public interface IAiService 
 {
-    IAsyncEnumerable<AiResponse> AnalyzeAsync(AiRequest request);
+    IAsyncEnumerable<AiResponse?> AnalyzeAsync(AiRequest request);
 }

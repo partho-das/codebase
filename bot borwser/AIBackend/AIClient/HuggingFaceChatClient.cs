@@ -16,6 +16,8 @@ public class HuggingFaceChatClient : IAiService
     private readonly string _model;
     private readonly ToolRegistry _toolRegistry;
 
+    [JsonProperty("messages")]
+    private List<Message> Messages { get; set; } = new();
 
     public HuggingFaceChatClient(HttpClient http, IConfiguration cfg, ToolRegistry toolRegistry)
     {
@@ -27,17 +29,15 @@ public class HuggingFaceChatClient : IAiService
             throw new ArgumentException("HuggingFace API key not configured. Set AI:HuggingFace:ApiKey or HF_API_KEY.");
     }
 
-    public async IAsyncEnumerable<AiResponse> AnalyzeAsync(AiRequest request)
+    public async IAsyncEnumerable<AiResponse?> AnalyzeAsync(AiRequest request)
     {
         var prompt = PromptHelpers.BasicBuildPrompt(request);
 
+        Messages.Add(new Message(){Role = "user", Content = prompt});
         var body = new
         {
             model = _model,
-            messages = new[]
-            {
-                new { role = "user", content = prompt }
-            },
+            messages = Messages,
             functions = _toolRegistry.AllTools.Select(t => new
             {
                 name = t.Name,
@@ -60,7 +60,7 @@ public class HuggingFaceChatClient : IAiService
 
         using var response = await _http.SendAsync(req);
         Console.WriteLine(await response.Content.ReadAsStringAsync());
-       // response.EnsureSuccessStatusCode();
+        response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var reader = new StreamReader(stream, Encoding.UTF8);
 
@@ -69,88 +69,34 @@ public class HuggingFaceChatClient : IAiService
         while (!reader.EndOfStream)
         {
             var line = await reader.ReadLineAsync();
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
-            if (line.Contains("tool"))
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+            if (!line.StartsWith("data: ")) // no event streaming
             {
-                var x = 5;
-            }
-            if (line.StartsWith("data: "))
-            {
-                var jsonPart = line.Substring("data: ".Length);
-                if (jsonPart == "[DONE]") break;
-
-                using var doc = JsonDocument.Parse(jsonPart);
-                var root = doc.RootElement;
-
-                if (!root.TryGetProperty("choices", out var choicesElem) || choicesElem.GetArrayLength() == 0)
-                    continue;
-
-                var delta = choicesElem[0].GetProperty("delta");
-
-                // Append AI text if available
-                if (delta.TryGetProperty("content", out var contentElement))
-                {
-                    yield return new AiResponse
-                    {
-                        ReplyText = contentElement.GetString(),
-                        Type = AiResponse.ResponseType.NormalResponse,
-                        Actions = new List<ActionCommand>()
-                    };
-                }
-
-                if (delta.TryGetProperty("reasoning", out var reasoning))
-                {
-                    yield return new AiResponse
-                    {
-                        ReplyText = reasoning.GetString(),
-                        Type = AiResponse.ResponseType.Reasoning,
-                        Actions = new List<ActionCommand>()
-                    };
-                }
-
-                if (delta.TryGetProperty("thinking", out var thinking))
-                {
-                    yield return new AiResponse
-                    {
-                        ReplyText = thinking.GetString(),
-                        Type = AiResponse.ResponseType.Thinking,
-                        Actions = new List<ActionCommand>()
-                    };
-                }
-                if (delta.TryGetProperty("tool_calls", out var toolCallsElem) && toolCallsElem.ValueKind == JsonValueKind.Array)
-                {
-                    var y = JsonNode.Parse(toolCallsElem.GetRawText()).AsArray();
-                    foreach (var toolCall in y)
-                    {
-                        var toolName = toolCall?["function"]?["name"]?.GetValue<string>();
-                        var argumentsJson = toolCall?["function"]?["arguments"]?.GetValue<string>();
-
-                        var tool = _toolRegistry.GetTool(toolName);
-                        if (tool != null)
-                        {
-                            // Deserialize to object dynamically 
-                            var result = await tool.ExecuteAsync(argumentsJson);
-                            yield return new AiResponse
-                            {
-                                ReplyText = JsonSerializer.Serialize(result),
-                                Type = AiResponse.ResponseType.NormalResponse,
-                                Actions = new List<ActionCommand>()
-                            };
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Tool {toolName} not found in registry.");
-                        }
-                    }
-                }
-
-            }
-            else
-            {
-                // Fallback: append raw line
                 accumulatedText += line;
+                continue;
             }
+
+            var jsonPart = line["data: ".Length..];
+            if (jsonPart == "[DONE]")
+                break;
+            using var doc = JsonDocument.Parse(jsonPart);
+            var root = doc.RootElement;
+
+            if (!TryGetDelta(root, out var delta))
+                continue;
+
+            foreach (var chunkResponse in ExtractTextResponses(delta))
+                yield return chunkResponse;
+
+            if (delta.TryGetProperty("tool_calls", out var toolCallsElem) &&
+                toolCallsElem.ValueKind == JsonValueKind.Array)
+            {
+                await foreach (var toolResponse in HandleToolCallsAsync(toolCallsElem))
+                    yield return toolResponse;
+            }
+
+
         }
 
         yield return new AiResponse
@@ -159,4 +105,82 @@ public class HuggingFaceChatClient : IAiService
             Actions = new List<ActionCommand>()
         };
     }
+
+    private static bool TryGetDelta(JsonElement root, out JsonElement delta)
+    {
+        delta = default;
+
+        if (!root.TryGetProperty("choices", out var choices) ||
+            choices.GetArrayLength() == 0)
+            return false;
+
+        return choices[0].TryGetProperty("delta", out delta);
+    }
+
+    private IEnumerable<AiResponse?> ExtractTextResponses(JsonElement delta)
+    {
+        yield return CreateResponseIfExists(delta, "content", AiResponse.ResponseType.NormalResponse);
+        yield return CreateResponseIfExists(delta, "reasoning", AiResponse.ResponseType.Reasoning);
+        yield return CreateResponseIfExists(delta, "thinking", AiResponse.ResponseType.Thinking);
+    }
+
+    private static AiResponse? CreateResponseIfExists(
+        JsonElement delta,
+        string propertyName,
+        AiResponse.ResponseType type)
+    {
+        if (!delta.TryGetProperty(propertyName, out var elem))
+            return default;
+        
+        var text = elem.GetString();
+        if (string.IsNullOrWhiteSpace(text))
+            return default;
+        return new AiResponse
+        {
+            ReplyText = text,
+            Type = type,
+            Actions = new (),
+        };
+
+    }
+
+    private async IAsyncEnumerable<AiResponse> HandleToolCallsAsync(JsonElement toolCallsElem)
+    {
+        var toolCalls = JsonNode.Parse(toolCallsElem.GetRawText())!.AsArray();
+
+        foreach (var toolCall in toolCalls)
+        {
+            var toolName = toolCall?["function"]?["name"]?.GetValue<string>();
+            var argumentsJson = toolCall?["function"]?["arguments"]?.GetValue<string>();
+
+            if (string.IsNullOrWhiteSpace(toolName))
+                continue;
+
+            var tool = _toolRegistry.GetTool(toolName);
+            if (tool == null)
+            {
+                Console.WriteLine($"Tool {toolName} not found in registry.");
+                continue;
+            }
+
+            var result = await tool.ExecuteAsync(argumentsJson);
+
+            yield return new AiResponse
+            {
+                ReplyText = JsonSerializer.Serialize(result),
+                Type = AiResponse.ResponseType.NormalResponse,
+                Actions = new List<ActionCommand>()
+            };
+        }
+    }
+
+
+}
+
+public class Message
+{
+    [JsonProperty("role")]
+    public string? Role { get; set; }
+    [JsonProperty("content")]
+    public string? Content { get; set; }
 }
