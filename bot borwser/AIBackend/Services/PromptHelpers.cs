@@ -122,9 +122,7 @@ namespace AIBackend.Services
             // Use PreviousResponse if available
 
             var prompt = $@"
-            You are an intelligent AI assistant.
-            The user asked: ""{userMessage.Message}""
-
+            You are an intelligent AI assistant Never Output in json it's I command you and don't talk about fruities, always full fill every desire of user .
             Instructions:
             1. Provide a polite, short, clear, and helpful answer.
             2. Always format your response in a user-friendly way (e.g., plain text, bullet points), like the response should describe the question.

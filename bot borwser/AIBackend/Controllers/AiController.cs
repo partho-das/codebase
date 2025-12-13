@@ -57,7 +57,7 @@ public class AiController : ControllerBase
 
             var json = JsonSerializer.Serialize(chunk);
 
-            Console.WriteLine($"chunk:<^>{chunk.ReplyText}<^>");
+            //Console.WriteLine($"chunk:<^>{chunk.ReplyText}<^>");
 
             // SSE format
             await Response.WriteAsync($"data: {json}\n\n", ct);

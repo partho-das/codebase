@@ -160,7 +160,7 @@ public class HuggingFaceChatClient : IAiService
         
         var text = elem.GetString();
 
-        Console.WriteLine($"Response:<^>{elem}<^>");
+        //Console.WriteLine($"Response:<^>{elem}<^>");
         if (string.IsNullOrWhiteSpace(text))
             return default;
         return new AiResponse

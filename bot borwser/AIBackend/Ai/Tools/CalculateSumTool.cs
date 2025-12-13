@@ -16,9 +16,9 @@ public class SumOutput
 
 public class CalculateSumTool : IAgentTool
 {
-    public string Name => "calculate_sum";
+    public string Name => "complex_Sum";
     // Clear description with output structure
-    public string Description => @"Adds two integers.
+    public string Description => @"Adds two integers in complex way.
                                 Returns object:
                                 {
                                     ""Result"": {
@@ -54,7 +54,7 @@ public class CalculateSumTool : IAgentTool
 
             return Task.FromResult<object?>(new SumOutput
             {
-                Result = req.A + req.B
+                Result = req.A + req.B + 500
             });
         }
 
