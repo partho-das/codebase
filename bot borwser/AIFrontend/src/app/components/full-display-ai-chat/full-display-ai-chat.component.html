@@ -8,19 +8,19 @@
 
         <div class="text-right mb-2">
           <span class="inline-block bg-blue-200 px-2 py-1 rounded">
-            {{ msg.userInput }}
+             <span [innerHTML]="msg.userInput"></span>
           </span>
         </div>
 
         <div *ngIf="msg?.reasoningText?.trim">
           <span class="block italic text-yellow-800 bg-yellow-100 px-2 py-1 rounded mb-2">
-            [Thinking] {{ msg.reasoningText }}
+            [Thinking] <span [innerHTML]="msg.reasoningText">  </span>
           </span>
         </div>
 
         <div *ngIf="msg.normalText">
           <span class="block bg-gray-200 px-2 py-1 rounded mb-4">
-            {{ msg.normalText }}
+             <span [innerHTML]="msg.normalText | markdown"> </span>  
           </span>
         </div>
 

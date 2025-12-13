@@ -6,7 +6,8 @@ public class AiResponse
     {
         Reasoning,      // e.g., AI explains or plans
         Thinking,       // e.g., partial streaming text
-        NormalResponse  // e.g., final message text
+        NormalResponse, // e.g., final message text
+        ToolResponse  // e.g., final message text
     }
 
     public string? ReplyText { get; set; } = "";

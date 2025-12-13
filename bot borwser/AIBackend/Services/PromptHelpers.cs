@@ -119,13 +119,17 @@ namespace AIBackend.Services
 
         public static string BasicBuildPrompt(AiRequest userMessage)
         {
+            // Use PreviousResponse if available
+
             var prompt = $@"
-            You are an AI assistant.
-            The user asked:
-            ""{userMessage.Message}""
+            You are an intelligent AI assistant.
+            The user asked: ""{userMessage.Message}""
 
-            Provide a short, clear, and helpful response.";
-
+            Instructions:
+            1. Provide a polite, short, clear, and helpful answer.
+            2. Always format your response in a user-friendly way (e.g., plain text, bullet points), like the response should describe the question.
+            3. Only call tools if absolutely necessary. If the response can be generated from your knowledge, do not call any tools.
+            4. Avoid any internal structures, code, or explanations not meant for the user.";
             return prompt;
         }
     }

@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AiService, AiResponse, ResponseType } from '../../services/ai.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgForOf } from '@angular/common';
+import { MarkdownPipe } from '../../pipes/markdown.pipe';
 
 
 interface AiMessage{
@@ -12,7 +13,7 @@ interface AiMessage{
 @Component({
   selector: 'app-full-display-ai-chat',
   standalone: true,
-  imports: [  CommonModule, FormsModule, NgForOf],
+  imports: [  CommonModule, FormsModule, NgForOf, MarkdownPipe],
   templateUrl: './full-display-ai-chat.component.html',
   styleUrl: './full-display-ai-chat.component.scss'
 })
@@ -44,13 +45,7 @@ export class FullDisplayAiChatComponent {
         this.aiMessages.pop();
         this.aiMessages.push(aiResponse);
         if(aiResponse.normalText){
-          console.log("HI");
-        }
-        if(aiResponse.normalText.trim()){
-             console.log("HI");
-        }
-         if(aiResponse.normalText.length > 0){
-          console.log("HI");
+          console.log(aiResponse.normalText);
         }
 
       },

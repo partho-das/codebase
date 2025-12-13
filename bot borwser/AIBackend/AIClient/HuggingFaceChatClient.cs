@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using AIBackend.Ai.Tools;
+using AIBackend.Interfaces;
 using AIBackend.Models;
 using AIBackend.Services;
 using Newtonsoft.Json;
@@ -16,8 +17,6 @@ public class HuggingFaceChatClient : IAiService
     private readonly string _model;
     private readonly ToolRegistry _toolRegistry;
 
-    [JsonProperty("messages")]
-    private List<Message> Messages { get; set; } = new();
 
     public HuggingFaceChatClient(HttpClient http, IConfiguration cfg, ToolRegistry toolRegistry)
     {
@@ -32,12 +31,32 @@ public class HuggingFaceChatClient : IAiService
     public async IAsyncEnumerable<AiResponse?> AnalyzeAsync(AiRequest request)
     {
         var prompt = PromptHelpers.BasicBuildPrompt(request);
+        List<Message> messages = new() { new Message() { Role = "system", Content = prompt } };
+        List<ToolResponse> newTollResponse = new();
 
-        Messages.Add(new Message(){Role = "user", Content = prompt});
+        messages.Add(new Message(){Role = "user", Content = request.Message});
+        bool firstMessage = true;
+
+        while (true)
+        {
+
+            if (!firstMessage && newTollResponse.Count == 0) yield break;
+            firstMessage = false;
+            newTollResponse.Clear();
+
+            await foreach (var response in GetResponseForMessages(messages, newTollResponse))
+            {
+                yield return response;
+            }
+        }
+    }
+
+    private async IAsyncEnumerable<AiResponse?> GetResponseForMessages(List<Message> messages, List<ToolResponse> toolResponses)
+    {
         var body = new
         {
             model = _model,
-            messages = Messages,
+            messages = messages,
             functions = _toolRegistry.AllTools.Select(t => new
             {
                 name = t.Name,
@@ -49,6 +68,7 @@ public class HuggingFaceChatClient : IAiService
             temperature = 0.3,
             stream = true
         };
+
 
         var jsonBody = JsonConvert.SerializeObject(body);
         var req = new HttpRequestMessage(HttpMethod.Post, $"https://router.huggingface.co/v1/chat/completions")
@@ -65,6 +85,7 @@ public class HuggingFaceChatClient : IAiService
         using var reader = new StreamReader(stream, Encoding.UTF8);
 
         string accumulatedText = "";
+
 
         while (!reader.EndOfStream)
         {
@@ -93,17 +114,22 @@ public class HuggingFaceChatClient : IAiService
                 toolCallsElem.ValueKind == JsonValueKind.Array)
             {
                 await foreach (var toolResponse in HandleToolCallsAsync(toolCallsElem))
-                    yield return toolResponse;
+                {
+                    messages.Add(new Message()
+                    {
+                        Role = "system",
+                        Content = $"Tool Response:  ToolName = {toolResponse.ToolName}, Response = {JsonSerializer.Serialize(toolResponse.Result) }",
+                    });
+                    toolResponses.Add(toolResponse);
+                }
+                    
             }
 
 
         }
 
-        yield return new AiResponse
-        {
-            ReplyText = accumulatedText,
-            Actions = new List<ActionCommand>()
-        };
+        yield break;
+
     }
 
     private static bool TryGetDelta(JsonElement root, out JsonElement delta)
@@ -133,6 +159,8 @@ public class HuggingFaceChatClient : IAiService
             return default;
         
         var text = elem.GetString();
+
+        Console.WriteLine($"Response:<^>{elem}<^>");
         if (string.IsNullOrWhiteSpace(text))
             return default;
         return new AiResponse
@@ -144,7 +172,7 @@ public class HuggingFaceChatClient : IAiService
 
     }
 
-    private async IAsyncEnumerable<AiResponse> HandleToolCallsAsync(JsonElement toolCallsElem)
+    private async IAsyncEnumerable<ToolResponse> HandleToolCallsAsync(JsonElement toolCallsElem)
     {
         var toolCalls = JsonNode.Parse(toolCallsElem.GetRawText())!.AsArray();
 
@@ -157,24 +185,28 @@ public class HuggingFaceChatClient : IAiService
                 continue;
 
             var tool = _toolRegistry.GetTool(toolName);
+           
             if (tool == null)
             {
                 Console.WriteLine($"Tool {toolName} not found in registry.");
                 continue;
             }
-
             var result = await tool.ExecuteAsync(argumentsJson);
-
-            yield return new AiResponse
+            yield return new ToolResponse()
             {
-                ReplyText = JsonSerializer.Serialize(result),
-                Type = AiResponse.ResponseType.NormalResponse,
-                Actions = new List<ActionCommand>()
+                Result = JsonSerializer.Serialize(result),
+                ToolName = toolName
             };
         }
     }
 
 
+}
+
+public class ToolResponse
+{
+    public object Result { get; set; }
+    public object ToolName { get; set; }
 }
 
 public class Message
@@ -183,4 +215,6 @@ public class Message
     public string? Role { get; set; }
     [JsonProperty("content")]
     public string? Content { get; set; }
+    //[JsonProperty("name")]
+    //public string? Name { get; set; }
 }
