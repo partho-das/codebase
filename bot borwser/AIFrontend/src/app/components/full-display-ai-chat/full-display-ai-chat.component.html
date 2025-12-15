@@ -31,7 +31,10 @@
     <div class="flex gap-2">
       <input [(ngModel)]="input" class="flex-1 border rounded p-2" placeholder="Ask AI..." />
       <button (click)="send()" class="bg-blue-600 text-white px-3 py-1 rounded">Send</button>
+      <button *ngIf="isStreaming" (click)="cancel()"class="bg-red-500 text-white px-3 py-1 rounded"> Cancel </button>
     </div>
+
+
 
   </div>
 

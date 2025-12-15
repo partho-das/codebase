@@ -3,6 +3,7 @@ import { AiService, AiResponse, ResponseType } from '../../services/ai.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgForOf } from '@angular/common';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
+import { EventSourceService } from '../../services/event-source.service';
 
 
 interface AiMessage{
@@ -20,8 +21,8 @@ interface AiMessage{
 export class FullDisplayAiChatComponent {
   aiMessages: AiMessage[] = [];
   input = '';
-
-  constructor(private aiService: AiService) {}
+  isStreaming = false;
+  constructor(private aiService: AiService, private eventSourceService : EventSourceService) {}
 
   async send() {
     const msg = this.input.trim();
@@ -34,7 +35,7 @@ export class FullDisplayAiChatComponent {
     if (!stream$) return;
     
     this.aiMessages.push(aiResponse);
-
+    this.isStreaming = true;
     stream$.subscribe({
       next: (chunk: AiResponse) => {
         if (chunk.Type == ResponseType.Reasoning) {
@@ -44,14 +45,22 @@ export class FullDisplayAiChatComponent {
         }
         this.aiMessages.pop();
         this.aiMessages.push(aiResponse);
-        if(aiResponse.normalText){
-          console.log(aiResponse.normalText);
-        }
-
+        // if(aiResponse.normalText){
+        //   console.log(aiResponse.normalText);
+        // }
       },
       error: (err) => {
         this.aiMessages.push({ userInput: msg,  reasoningText: "Error: By Stestem", normalText: 'Error: ' + err.message });
+        this.isStreaming = false;
       },
+      complete: () => {
+        this.isStreaming = false;
+      }
     });
+  }
+
+  cancel(){
+    this.eventSourceService.close();
+    this.isStreaming = false;
   }
 }
