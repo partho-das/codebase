@@ -31,10 +31,10 @@ public class HuggingFaceChatClient : IAiService
     public async IAsyncEnumerable<AiResponse?> AnalyzeAsync(AiRequest request)
     {
         var prompt = PromptHelpers.BasicBuildPrompt(request);
-        List<Message> messages = new() { new Message() { Role = "system", Content = prompt } };
+        List<MyMessage> messages = new() { new MyMessage() { Role = "system", Content = prompt } };
         List<ToolResponse> newTollResponse = new();
 
-        messages.Add(new Message(){Role = "user", Content = request.Message});
+        messages.Add(new MyMessage(){Role = "user", Content = request.Message});
         bool firstMessage = true;
 
         while (true)
@@ -51,7 +51,7 @@ public class HuggingFaceChatClient : IAiService
         }
     }
 
-    private async IAsyncEnumerable<AiResponse?> GetResponseForMessages(List<Message> messages, List<ToolResponse> toolResponses)
+    private async IAsyncEnumerable<AiResponse?> GetResponseForMessages(List<MyMessage> messages, List<ToolResponse> toolResponses)
     {
         var body = new
         {
@@ -115,7 +115,7 @@ public class HuggingFaceChatClient : IAiService
             {
                 await foreach (var toolResponse in HandleToolCallsAsync(toolCallsElem))
                 {
-                    messages.Add(new Message()
+                    messages.Add(new MyMessage()
                     {
                         Role = "system",
                         Content = $"Tool Response:  ToolName = {toolResponse.ToolName}, Response = {JsonSerializer.Serialize(toolResponse.Result) }",
@@ -209,7 +209,7 @@ public class ToolResponse
     public object ToolName { get; set; }
 }
 
-public class Message
+public class MyMessage
 {
     [JsonProperty("role")]
     public string? Role { get; set; }

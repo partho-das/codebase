@@ -1,76 +1,59 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using AIBackend.Ai.Tools;
 using AIBackend.Models;
 using AIBackend.Services;
-using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using LangChain.Providers;
+using LangChain.Providers.Ollama;
+using System.Text.Json;
 
 namespace AIBackend.AIClient
 {
     public class OllamaChatClient : IAiService
     {
-        public readonly HttpClient _http;
-        public readonly string _model;
-        public readonly string _baseUrl;
+        private readonly string _model;
+        private readonly OllamaChatModel _ollama;
+        private readonly ToolRegistry _toolRegistry;
 
-        public OllamaChatClient(HttpClient http, IConfiguration cfg)
+        public OllamaChatClient(IConfiguration cfg, ToolRegistry toolRegistry)
         {
-            _http = http;
+            _toolRegistry = toolRegistry;
             _model = cfg["AI:Ollama:Model"] ?? "llama2";
-            _baseUrl = cfg["AI:Ollama:BaseUrl"] ?? "http://localhost:11434";
+            var baseUrl = cfg["AI:Ollama:BaseUrl"] ?? "http://localhost:11434";
+            
+            var provider = new OllamaProvider(baseUrl);
+            _ollama = new OllamaChatModel(provider, _model);
         }
+
         public async IAsyncEnumerable<AiResponse?> AnalyzeAsync(AiRequest request)
         {
-            var prompt = PromptHelpers.BasicBuildPrompt(request);
-
-            var body = new
+            var systemPrompt = PromptHelpers.BasicBuildPrompt(request);
+            var messages = new List<Message>
             {
-                model = _model,
-                prompt,
-                temperature = 0.2,
-                max_tokens = 200,
-                stream = true
+                new Message(systemPrompt, MessageRole.System),
+                new Message(request.Message, MessageRole.Human)
             };
-            var jsonBody = JsonConvert.SerializeObject(body);
-            var req = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/api/generate")
+
+            var chatRequest = ChatRequest.ToChatRequest(messages);
+            var chatSettings = new OllamaChatSettings
             {
-                Content = new StringContent(jsonBody, Encoding.UTF8, "application/json")
+                UseStreaming = true,
+                Temperature = 0.2f,
+                NumPredict = 500
             };
-            using var response = await _http.SendAsync(req);
-            response.EnsureSuccessStatusCode();
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            using var read = new StreamReader(stream, Encoding.UTF8);
 
-            string returnValueTask = "";
-
-        
-                while (!read.EndOfStream)
+            await foreach (var chunk in _ollama.GenerateAsync(chatRequest, chatSettings))
+            {
+                // Stream text content
+                var text = chunk.LastMessageContent;
+                if (!string.IsNullOrWhiteSpace(text))
                 {
-                    var line = await read.ReadLineAsync();
-                    if (line == null) break;
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-
-                    if (line.StartsWith("data: "))
+                    yield return new AiResponse
                     {
-                        var jsonPart = line.Substring("data: ".Length);
-                        if (jsonPart == "[DONE]") break;
-                        var chunkObj = JsonDocument.Parse(jsonPart);
-                        returnValueTask += chunkObj.RootElement.GetProperty("choices")[0].GetProperty("delta").GetString();
-                        Console.Write(returnValueTask);
-                    }
-                    else
-                    {
-                        var jsonDocument = JsonDocument.Parse(line);
-                        returnValueTask += jsonDocument.RootElement.ToString();
-
-
+                        ReplyText = text,
+                        Type = AiResponse.ResponseType.NormalResponse,
+                        Actions = new()
+                    };
                 }
-                //yield return new AiResponse { ReplyText = returnValueTask, Actions = new List<ActionCommand>() };
-
-                }
-
-                yield return new AiResponse { ReplyText = returnValueTask, Actions = new List<ActionCommand>() };
-
+            }
         }
     }
 }

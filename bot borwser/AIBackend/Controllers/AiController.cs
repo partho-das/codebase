@@ -67,7 +67,7 @@ public class AiController : ControllerBase
             {
                 try
                 {
-                    await Task.Delay(50, ct);
+                    //await Task.Delay(10);
                 }
                 catch (Exception ex)
                 {

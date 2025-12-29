@@ -38,7 +38,7 @@ export class FullDisplayAiChatComponent {
     this.isStreaming = true;
     stream$.subscribe({
       next: (chunk: AiResponse) => {
-        if (chunk.Type == ResponseType.Reasoning) {
+        if (chunk.Type == ResponseType.Reasoning || chunk.Type == ResponseType.Thinking) {
           aiResponse.reasoningText += chunk.ReplyText;
         } else {
           aiResponse.normalText += chunk.ReplyText;

@@ -7,11 +7,10 @@ public class AiResponse
         Reasoning,      // e.g., AI explains or plans
         Thinking,       // e.g., partial streaming text
         NormalResponse, // e.g., final message text
-        ToolResponse  // e.g., final message text
+        ToolResponse    // e.g., tool execution feedback
     }
 
     public string? ReplyText { get; set; } = "";
     public List<ActionCommand> Actions { get; set; } = new List<ActionCommand>();
     public ResponseType Type { get; set; } = ResponseType.NormalResponse;
-    
 }
